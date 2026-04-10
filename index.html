@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merch'd Apparel — New Customer Setup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f7f8fa; color: #1a202c; }
+
+  .page { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 36px; }
+  .logo-banner { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 24px 24px 18px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .logo-banner img { width: 200px; height: auto; display: block; }
+  .logo-tagline { font-size: 11px; color: #a0aec0; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { font-size: 24px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #718096; }
+
+  /* Sections */
+  .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #a0aec0; margin-bottom: 18px; }
+
+  /* Fields */
+  .grid { display: grid; gap: 14px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .span2 { grid-column: 1 / -1; }
+  @media(max-width:560px){ .g2,.g3{ grid-template-columns:1fr; } }
+
+  .f { display: flex; flex-direction: column; gap: 4px; }
+  .f label { font-size: 12px; font-weight: 600; color: #4a5568; }
+  .f label .r { color: #e53e3e; }
+  .f input, .f select, .f textarea {
+    border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 9px 11px;
+    font-size: 14px; color: #1a202c; background: #f7f8fa; outline: none;
+    transition: border 0.15s, background 0.15s; font-family: inherit;
+  }
+  .f input:focus, .f select:focus, .f textarea:focus { border-color: #3182ce; background: #fff; }
+  .f textarea { resize: vertical; min-height: 70px; }
+  .f .hint { font-size: 11px; color: #a0aec0; }
+
+  /* Radio */
+  .radios { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 2px; }
+  .radios label { display: flex; align-items: center; gap: 7px; font-size: 14px; color: #2d3748; cursor: pointer; }
+  .radios input { width: 15px; height: 15px; accent-color: #3182ce; }
+
+  /* Same-as checkbox */
+  .same-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4a5568; margin-bottom: 14px; cursor: pointer; }
+  .same-check input { width: 15px; height: 15px; accent-color: #3182ce; }
+
+  /* Terms */
+  .terms { background: #f7f8fa; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; font-size: 12px; color: #718096; line-height: 1.75; max-height: 120px; overflow-y: auto; margin-bottom: 12px; }
+  .agree { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #2d3748; cursor: pointer; }
+  .agree input { width: 15px; height: 15px; margin-top: 2px; accent-color: #3182ce; flex-shrink: 0; }
+
+  /* Signature */
+  canvas#sig { border: 1.5px solid #e2e8f0; border-radius: 6px; background: #fff; width: 100%; height: 100px; cursor: crosshair; display: block; touch-action: none; }
+  .sig-foot { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+  .btn-clear { background: none; border: 1px solid #e2e8f0; border-radius: 5px; padding: 5px 12px; font-size: 12px; color: #718096; cursor: pointer; }
+  .btn-clear:hover { border-color: #cbd5e0; }
+
+  /* File inputs */
+  .file-input { background: #fff; padding: 10px 12px; border: 1.5px dashed #cbd5e0; border-radius: 6px; font-size: 13px; color: #4a5568; cursor: pointer; width: 100%; transition: border 0.15s; }
+  .file-input:hover { border-color: #3182ce; }
+
+  /* Submit */
+  .actions { text-align: center; margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .btn-submit { background: #1a202c; color: #fff; border: none; border-radius: 8px; padding: 13px 44px; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.2px; transition: background 0.15s; }
+  .btn-submit:hover { background: #2d3748; }
+  .btn-print { background: none; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 20px; font-size: 12px; color: #718096; cursor: pointer; }
+  .footer-note { font-size: 11px; color: #a0aec0; margin-top: 4px; }
+
+  @media print {
+    body { background: #fff; }
+    .actions { display: none; }
+    .section { border: 1px solid #ccc; }
+  }
+</style>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">emailjs.init("_SZ3LnlDaqUl0GEc1");</script>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo-banner">
+      <img src="merchd-logo-dark.png" alt="Merch'd Apparel" />
+      <div class="logo-tagline">Premium Branded Merchandise</div>
+    </div>
+    <h1>New Customer Setup</h1>
+    <p class="subtitle">Fill out once — takes about 3 minutes. Questions? <strong>info@merchd.com</strong></p>
+  </div>
+
+  <!-- 1. Company -->
+  <div class="section">
+    <div class="section-title">Company</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>Legal Company Name <span class="r">*</span></label>
+        <input type="text" id="co_name" placeholder="e.g. Skytop Aero LLC" />
+      </div>
+      <div class="f">
+        <label>DBA / Trade Name</label>
+        <input type="text" id="co_dba" placeholder="If different" />
+      </div>
+      <div class="f">
+        <label>Industry</label>
+        <select id="co_industry">
+          <option value="">Select...</option>
+          <option>Aviation</option>
+          <option>Corporate / Finance</option>
+          <option>Golf / Country Club</option>
+          <option>Real Estate</option>
+          <option>Hospitality</option>
+          <option>Healthcare</option>
+          <option>Technology</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Federal Tax ID (EIN) <span class="r">*</span></label>
+        <input type="text" id="co_ein" placeholder="XX-XXXXXXX" />
+      </div>
+      <div class="f">
+        <label>Website</label>
+        <input type="url" id="co_web" placeholder="https://company.com" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Billing Address -->
+  <div class="section">
+    <div class="section-title">Billing Address</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>Street Address <span class="r">*</span></label>
+        <input type="text" id="bill_street" placeholder="123 Main St, Suite 400" />
+      </div>
+      <div class="f">
+        <label>City <span class="r">*</span></label>
+        <input type="text" id="bill_city" />
+      </div>
+      <div class="f">
+        <label>State <span class="r">*</span></label>
+        <input type="text" id="bill_state" placeholder="FL" maxlength="2" style="text-transform:uppercase" />
+      </div>
+      <div class="f">
+        <label>ZIP <span class="r">*</span></label>
+        <input type="text" id="bill_zip" placeholder="33601" maxlength="10" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Shipping Address -->
+  <div class="section">
+    <div class="section-title">Shipping Address</div>
+    <label class="same-check"><input type="checkbox" id="same_ship" onchange="toggleShip(this)" /> Same as billing address</label>
+    <div id="ship_fields">
+      <div class="grid g2">
+        <div class="f span2">
+          <label>Street Address</label>
+          <input type="text" id="ship_street" placeholder="123 Main St" />
+        </div>
+        <div class="f">
+          <label>City</label>
+          <input type="text" id="ship_city" />
+        </div>
+        <div class="f">
+          <label>State</label>
+          <input type="text" id="ship_state" placeholder="FL" maxlength="2" style="text-transform:uppercase" />
+        </div>
+        <div class="f">
+          <label>ZIP</label>
+          <input type="text" id="ship_zip" placeholder="33601" maxlength="10" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Contacts -->
+  <div class="section">
+    <div class="section-title">Contacts</div>
+    <div class="grid g2">
+      <div class="f">
+        <label>Primary Contact Name <span class="r">*</span></label>
+        <input type="text" id="ct_name" placeholder="First Last" />
+      </div>
+      <div class="f">
+        <label>Title</label>
+        <input type="text" id="ct_title" placeholder="e.g. Director of Ops" />
+      </div>
+      <div class="f">
+        <label>Phone <span class="r">*</span></label>
+        <input type="tel" id="ct_phone" placeholder="(813) 555-0100" />
+      </div>
+      <div class="f">
+        <label>Email <span class="r">*</span></label>
+        <input type="email" id="ct_email" placeholder="name@company.com" />
+      </div>
+      <div class="f span2" style="border-top:1px solid #f0f0f0;padding-top:14px;margin-top:4px;">
+        <label>Invoicing / AP Email <span class="r">*</span></label>
+        <input type="email" id="ct_ap" placeholder="ap@company.com" />
+        <span class="hint">Where invoices should be sent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Payment -->
+  <div class="section">
+    <div class="section-title">Payment</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>Payment Method <span class="r">*</span></label>
+        <div class="radios">
+          <label><input type="radio" name="pay_method" value="cc" checked /> Credit Card</label>
+          <label><input type="radio" name="pay_method" value="wire_ach" /> Wire / ACH</label>
+        </div>
+        <span class="hint" style="margin-top:4px;">All orders require payment before production begins.</span>
+      </div>
+      <div class="f span2">
+        <label>Notes / Special Instructions</label>
+        <textarea id="pay_notes" placeholder="PO number required? Any billing contacts or instructions..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Documents -->
+  <div class="section">
+    <div class="section-title">Documents</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>Company Logo <span class="r">*</span></label>
+        <input type="file" id="logo_file" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" class="file-input" />
+        <span class="hint">Vector preferred (AI, EPS, SVG) or high-res PNG/JPG — max 20MB</span>
+      </div>
+      <div class="f span2" style="border-top:1px solid #f0f0f0;padding-top:14px;margin-top:2px;">
+        <label>W-9 Form</label>
+        <input type="file" id="w9_file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" />
+        <span class="hint">Required for vendors receiving $600+ annually — PDF preferred, max 5MB</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Signature -->
+  <div class="section">
+    <div class="section-title">Agreement & Signature</div>
+    <div class="terms">
+      <strong>Payment:</strong> Invoices are due per agreed terms. Late payments accrue 1.5%/month. Accounts may be placed on hold for past-due balances.<br><br>
+      <strong>Custom Orders:</strong> Decorated merchandise is non-returnable except for manufacturing defects. Claims must be submitted within 14 days of delivery.<br><br>
+      <strong>Proofs:</strong> Customer is responsible for reviewing all digital proofs before production. Errors approved by customer are not our liability.<br><br>
+      <strong>Production:</strong> Standard lead time is 10–14 business days after proof approval and payment. Rush orders subject to availability and additional charges.
+    </div>
+    <label class="agree"><input type="checkbox" id="agree" /> I have read and agree to the terms above <span class="r">*</span></label>
+
+    <div class="grid g2" style="margin-top:18px;">
+      <div class="f">
+        <label>Printed Name <span class="r">*</span></label>
+        <input type="text" id="sig_name" />
+      </div>
+      <div class="f">
+        <label>Title <span class="r">*</span></label>
+        <input type="text" id="sig_title" />
+      </div>
+      <div class="f">
+        <label>Date</label>
+        <input type="date" id="sig_date" />
+      </div>
+      <div class="f span2">
+        <label>Signature <span class="r">*</span></label>
+        <canvas id="sig"></canvas>
+        <div class="sig-foot">
+          <button class="btn-clear" onclick="clearSig()">✕ Clear</button>
+          <span style="font-size:11px;color:#a0aec0;">Draw with mouse or finger</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-submit" onclick="submitForm()">Submit Account Setup</button>
+    <button class="btn-print" onclick="window.print()">🖨 Print</button>
+    <p class="footer-note">Your information is kept confidential and used only to set up your Merch'd account.</p>
+  </div>
+
+</div>
+
+<script>
+// Set today's date
+document.getElementById('sig_date').value = new Date().toISOString().split('T')[0];
+
+// Shipping toggle
+function toggleShip(cb) {
+  document.getElementById('ship_fields').style.display = cb.checked ? 'none' : 'block';
+}
+
+// Signature canvas
+const canvas = document.getElementById('sig');
+const ctx = canvas.getContext('2d');
+let drawing = false;
+
+function resize() {
+  const data = canvas.toDataURL();
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = 100 * 2;
+  ctx.scale(2, 2);
+  ctx.strokeStyle = '#1a202c';
+  ctx.lineWidth = 2;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+resize();
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  const s = e.touches ? e.touches[0] : e;
+  return { x: (s.clientX - r.left) * (canvas.width / r.width / 2), y: (s.clientY - r.top) * (canvas.height / r.height / 2) };
+}
+
+canvas.addEventListener('mousedown', e => { drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove', e => { if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); });
+canvas.addEventListener('mouseup', () => drawing = false);
+canvas.addEventListener('mouseleave', () => drawing = false);
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; const p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!drawing) return; const p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); }, { passive: false });
+canvas.addEventListener('touchend', () => drawing = false);
+
+function clearSig() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+function val(id) { return (document.getElementById(id) || {}).value || ''; }
+
+async function submitForm() {
+  if (!document.getElementById('agree').checked) { alert('Please agree to the terms.'); return; }
+  if (!val('co_name')) { alert('Company name is required.'); return; }
+  if (!val('co_ein')) { alert('Federal Tax ID (EIN) is required.'); return; }
+  if (!val('ct_name')) { alert('Primary contact name is required.'); return; }
+  if (!val('ct_email')) { alert('Contact email is required.'); return; }
+  if (!val('ct_ap')) { alert('Invoicing/AP email is required.'); return; }
+  if (!val('sig_name')) { alert('Printed name is required.'); return; }
+
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+
+  const sameShip = document.getElementById('same_ship').checked;
+  const taxExempt = document.querySelector('input[name="tax_exempt"]:checked')?.value || 'No';
+  const payMethod = document.querySelector('input[name="pay_method"]:checked')?.value || '';
+
+  const templateParams = {
+    'Legal Company Name': val('co_name'),
+    'DBA': val('co_dba'),
+    'Industry': val('co_industry'),
+    'Federal Tax ID (EIN)': val('co_ein'),
+    'Website': val('co_web'),
+    'Billing Street': val('bill_street'),
+    'Billing City': val('bill_city'),
+    'Billing State': val('bill_state').toUpperCase(),
+    'Billing Zip': val('bill_zip'),
+    'Shipping Address': sameShip ? 'Same as Billing' : val('ship_street') + ', ' + val('ship_city') + ', ' + val('ship_state').toUpperCase() + ' ' + val('ship_zip'),
+    'Primary Contact Name': val('ct_name'),
+    'Contact Title': val('ct_title'),
+    'Contact Phone': val('ct_phone'),
+    'Email': val('ct_email'),
+    'Invoicing / AP Email': val('ct_ap'),
+    'Preferred Payment Method': payMethod,
+    'Payment Notes': val('pay_notes'),
+    'Tax Exempt': taxExempt,
+    'Authorized Signature Name': val('sig_name'),
+    'Authorized Signature Title': val('sig_title'),
+    'Signature Date': val('sig_date'),
+    'Submitted At': new Date().toISOString(),
+  };
+
+  try {
+    await emailjs.send('service_zsaybgi', 'template_c79g8v8', templateParams);
+
+    btn.textContent = '✅ Submitted!';
+    btn.style.background = '#276749';
+    document.querySelector('.footer-note').textContent = "We\'ve received your setup form and will follow up within 1 business day. Welcome aboard!";
+
+    // Discord notification
+    await fetch('https://discord.com/api/webhooks/1491537436059111424/S3jUusTYpihLgR2PqIKfj0NzegGLNhpE60fEa1UuTXhKkJHQ8EeajLY4_nWQB4IRLQ2K', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: "Merch\'d Forms",
+        embeds: [{
+          title: '🧢 New Customer Setup Submitted',
+          color: 1842720,
+          fields: [
+            { name: 'Company', value: templateParams['Legal Company Name'], inline: true },
+            { name: 'Contact', value: templateParams['Primary Contact Name'], inline: true },
+            { name: 'Email', value: templateParams['Email'], inline: true },
+            { name: 'Phone', value: templateParams['Contact Phone'] || 'N/A', inline: true },
+            { name: 'Payment', value: templateParams['Preferred Payment Method'] || 'N/A', inline: true },
+            { name: 'Tax Exempt', value: templateParams['Tax Exempt'], inline: true },
+          ],
+          footer: { text: 'Full details sent to mike@merchd.co' },
+          timestamp: new Date().toISOString()
+        }]
+      })
+    });
+
+  } catch(e) {
+    btn.textContent = 'Submit Account Setup';
+    btn.disabled = false;
+    alert('There was an issue submitting. Please email info@merchd.com directly or try again.');
+    console.error('EmailJS error:', e);
+  }
+}
+</script>
+</body>
+</html>
