@@ -346,38 +346,42 @@ async function submitForm() {
   const taxExempt = document.querySelector('input[name="tax_exempt"]:checked')?.value || 'No';
   const payMethod = document.querySelector('input[name="pay_method"]:checked')?.value || '';
 
-  const formData = {
-    access_key: 'adf9a778-fa2d-43a0-9f47-86587b2a8f63',
-    subject: 'New Merch\'d Customer Setup — ' + val('co_name'),
-    from_name: val('ct_name'),
-    email: val('ct_email'),
-    'Legal Company Name': val('co_name'),
-    'DBA': val('co_dba'),
-    'Industry': val('co_industry'),
-    'Federal Tax ID (EIN)': val('co_ein'),
-    'Website': val('co_web'),
-    'Billing Street': val('bill_street'),
-    'Billing City': val('bill_city'),
-    'Billing State': val('bill_state').toUpperCase(),
-    'Billing Zip': val('bill_zip'),
-    'Shipping Address': sameShip ? 'Same as Billing' : val('ship_street') + ', ' + val('ship_city') + ', ' + val('ship_state').toUpperCase() + ' ' + val('ship_zip'),
-    'Primary Contact Name': val('ct_name'),
-    'Contact Title': val('ct_title'),
-    'Contact Phone': val('ct_phone'),
-    'Invoicing / AP Email': val('ct_ap'),
-    'Preferred Payment Method': payMethod,
-    'Payment Notes': val('pay_notes'),
-    'Authorized Signature Name': val('sig_name'),
-    'Authorized Signature Title': val('sig_title'),
-    'Signature Date': val('sig_date'),
-    'Submitted At': new Date().toISOString(),
-  };
+  const fd = new FormData();
+  fd.append('access_key', 'adf9a778-fa2d-43a0-9f47-86587b2a8f63');
+  fd.append('subject', 'New Merch\'d Customer Setup — ' + val('co_name'));
+  fd.append('from_name', val('ct_name'));
+  fd.append('email', val('ct_email'));
+  fd.append('Legal Company Name', val('co_name'));
+  fd.append('DBA', val('co_dba'));
+  fd.append('Industry', val('co_industry'));
+  fd.append('Federal Tax ID (EIN)', val('co_ein'));
+  fd.append('Website', val('co_web'));
+  fd.append('Billing Street', val('bill_street'));
+  fd.append('Billing City', val('bill_city'));
+  fd.append('Billing State', val('bill_state').toUpperCase());
+  fd.append('Billing Zip', val('bill_zip'));
+  fd.append('Shipping Address', sameShip ? 'Same as Billing' : val('ship_street') + ', ' + val('ship_city') + ', ' + val('ship_state').toUpperCase() + ' ' + val('ship_zip'));
+  fd.append('Primary Contact Name', val('ct_name'));
+  fd.append('Contact Title', val('ct_title'));
+  fd.append('Contact Phone', val('ct_phone'));
+  fd.append('Invoicing / AP Email', val('ct_ap'));
+  fd.append('Preferred Payment Method', payMethod);
+  fd.append('Payment Notes', val('pay_notes'));
+  fd.append('Authorized Signature Name', val('sig_name'));
+  fd.append('Authorized Signature Title', val('sig_title'));
+  fd.append('Signature Date', val('sig_date'));
+  fd.append('Submitted At', new Date().toISOString());
+
+  // Attach files
+  const logoFile = document.getElementById('logo_file').files[0];
+  const w9File = document.getElementById('w9_file').files[0];
+  if (logoFile) fd.append('Company Logo', logoFile, logoFile.name);
+  if (w9File) fd.append('W-9 Form', w9File, w9File.name);
 
   try {
     const w3res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      body: fd
     });
     const w3data = await w3res.json();
     if (!w3data.success) throw new Error(w3data.message);
@@ -397,11 +401,11 @@ async function submitForm() {
           title: '🧢 New Customer Setup Submitted',
           color: 1842720,
           fields: [
-            { name: 'Company', value: formData['Legal Company Name'], inline: true },
-            { name: 'Contact', value: formData['Primary Contact Name'], inline: true },
-            { name: 'Email', value: formData['email'], inline: true },
-            { name: 'Phone', value: formData['Contact Phone'] || 'N/A', inline: true },
-            { name: 'Payment', value: formData['Preferred Payment Method'] || 'N/A', inline: true },
+            { name: 'Company', value: val('co_name'), inline: true },
+            { name: 'Contact', value: val('ct_name'), inline: true },
+            { name: 'Email', value: val('ct_email'), inline: true },
+            { name: 'Phone', value: val('ct_phone') || 'N/A', inline: true },
+            { name: 'Payment', value: payMethod || 'N/A', inline: true },
           ],
           footer: { text: 'Full details sent to mike@merchd.co' },
           timestamp: new Date().toISOString()
