@@ -396,12 +396,11 @@ async function submitForm() {
           title: '🧢 New Customer Setup Submitted',
           color: 1842720,
           fields: [
-            { name: 'Company', value: templateParams['Legal Company Name'], inline: true },
-            { name: 'Contact', value: templateParams['Primary Contact Name'], inline: true },
-            { name: 'Email', value: templateParams['Email'], inline: true },
-            { name: 'Phone', value: templateParams['Contact Phone'] || 'N/A', inline: true },
-            { name: 'Payment', value: templateParams['Preferred Payment Method'] || 'N/A', inline: true },
-            { name: 'Tax Exempt', value: templateParams['Tax Exempt'], inline: true },
+            { name: 'Company', value: formData['Legal Company Name'], inline: true },
+            { name: 'Contact', value: formData['Primary Contact Name'], inline: true },
+            { name: 'Email', value: formData['email'], inline: true },
+            { name: 'Phone', value: formData['Contact Phone'] || 'N/A', inline: true },
+            { name: 'Payment', value: formData['Preferred Payment Method'] || 'N/A', inline: true },
           ],
           footer: { text: 'Full details sent to mike@merchd.co' },
           timestamp: new Date().toISOString()
