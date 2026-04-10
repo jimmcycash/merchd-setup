@@ -78,8 +78,7 @@
     .section { border: 1px solid #ccc; }
   }
 </style>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="text/javascript">emailjs.init("_SZ3LnlDaqUl0GEc1");</script>
+  <!-- Web3Forms Pro -->
 </head>
 <body>
 <div class="page">
@@ -347,7 +346,11 @@ async function submitForm() {
   const taxExempt = document.querySelector('input[name="tax_exempt"]:checked')?.value || 'No';
   const payMethod = document.querySelector('input[name="pay_method"]:checked')?.value || '';
 
-  const templateParams = {
+  const formData = {
+    access_key: 'adf9a778-fa2d-43a0-9f47-86587b2a8f63',
+    subject: 'New Merch\'d Customer Setup — ' + val('co_name'),
+    from_name: val('ct_name'),
+    email: val('ct_email'),
     'Legal Company Name': val('co_name'),
     'DBA': val('co_dba'),
     'Industry': val('co_industry'),
@@ -361,11 +364,9 @@ async function submitForm() {
     'Primary Contact Name': val('ct_name'),
     'Contact Title': val('ct_title'),
     'Contact Phone': val('ct_phone'),
-    'Email': val('ct_email'),
     'Invoicing / AP Email': val('ct_ap'),
     'Preferred Payment Method': payMethod,
     'Payment Notes': val('pay_notes'),
-    'Tax Exempt': taxExempt,
     'Authorized Signature Name': val('sig_name'),
     'Authorized Signature Title': val('sig_title'),
     'Signature Date': val('sig_date'),
@@ -373,7 +374,13 @@ async function submitForm() {
   };
 
   try {
-    await emailjs.send('service_zsaybgi', 'template_c79g8v8', templateParams);
+    const w3res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+    const w3data = await w3res.json();
+    if (!w3data.success) throw new Error(w3data.message);
 
     btn.textContent = '✅ Submitted!';
     btn.style.background = '#276749';
