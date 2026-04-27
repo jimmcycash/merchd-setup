@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Merch'd Apparel — Vendor Setup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f7f8fa; color: #1a202c; }
+
+  .page { max-width: 680px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 36px; }
+  .logo-banner { background: #fff; border-bottom: 1px solid #e2e8f0; padding: 24px 24px 18px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .logo-banner img { width: 320px; height: auto; display: block; }
+  .logo-tagline { font-size: 11px; color: #a0aec0; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { font-size: 24px; font-weight: 700; color: #1a202c; margin-bottom: 6px; }
+  .subtitle { font-size: 13px; color: #718096; }
+
+  /* Sections */
+  .section { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 24px; margin-bottom: 16px; }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #a0aec0; margin-bottom: 18px; }
+
+  /* Fields */
+  .grid { display: grid; gap: 14px; }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  .g3 { grid-template-columns: 1fr 1fr 1fr; }
+  .span2 { grid-column: 1 / -1; }
+  @media(max-width:560px){ .g2,.g3{ grid-template-columns:1fr; } }
+
+  .f { display: flex; flex-direction: column; gap: 4px; }
+  .f label { font-size: 12px; font-weight: 600; color: #4a5568; }
+  .f label .r { color: #e53e3e; }
+  .f input, .f select, .f textarea {
+    border: 1.5px solid #e2e8f0; border-radius: 6px; padding: 9px 11px;
+    font-size: 14px; color: #1a202c; background: #f7f8fa; outline: none;
+    transition: border 0.15s, background 0.15s; font-family: inherit;
+  }
+  .f input:focus, .f select:focus, .f textarea:focus { border-color: #3182ce; background: #fff; }
+  .f textarea { resize: vertical; min-height: 70px; }
+  .f .hint { font-size: 11px; color: #a0aec0; }
+
+  /* Radio */
+  .radios { display: flex; gap: 20px; flex-wrap: wrap; padding-top: 2px; }
+  .radios label { display: flex; align-items: center; gap: 7px; font-size: 14px; color: #2d3748; cursor: pointer; }
+  .radios input { width: 15px; height: 15px; accent-color: #3182ce; }
+
+  /* Same-as checkbox */
+  .same-check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #4a5568; margin-bottom: 14px; cursor: pointer; }
+  .same-check input { width: 15px; height: 15px; accent-color: #3182ce; }
+
+  /* Terms */
+  .terms { background: #f7f8fa; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; font-size: 12px; color: #718096; line-height: 1.75; max-height: 120px; overflow-y: auto; margin-bottom: 12px; }
+  .agree { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: #2d3748; cursor: pointer; }
+  .agree input { width: 15px; height: 15px; margin-top: 2px; accent-color: #3182ce; flex-shrink: 0; }
+
+  /* File inputs */
+  .file-input { background: #fff; padding: 10px 12px; border: 1.5px dashed #cbd5e0; border-radius: 6px; font-size: 13px; color: #4a5568; cursor: pointer; width: 100%; transition: border 0.15s; }
+  .file-input:hover { border-color: #3182ce; }
+
+  /* ACH conditional fields */
+  #ach_fields { display: none; background: #f7f8fa; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-top: 8px; }
+  #ach_fields.visible { display: block; }
+
+  /* 1099 conditional field */
+  #tin_fields { display: none; margin-top: 8px; }
+  #tin_fields.visible { display: block; }
+
+  /* Submit */
+  .actions { text-align: center; margin-top: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .btn-submit { background: #1a202c; color: #fff; border: none; border-radius: 8px; padding: 13px 44px; font-size: 15px; font-weight: 700; cursor: pointer; letter-spacing: 0.2px; transition: background 0.15s; }
+  .btn-submit:hover { background: #2d3748; }
+  .footer-note { font-size: 11px; color: #a0aec0; margin-top: 4px; }
+
+  @media print {
+    body { background: #fff; }
+    .actions { display: none; }
+    .section { border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo-banner">
+      <img src="merchd-logo-dark.png" alt="Merch'd Apparel" />
+      <div class="logo-tagline">Premium Branded Merchandise</div>
+    </div>
+    <h1>New Vendor Setup</h1>
+    <p class="subtitle">Complete once to get set up in our system. Questions? <strong>info@merchd.co</strong></p>
+  </div>
+
+  <!-- 1. Company -->
+  <div class="section">
+    <div class="section-title">Company</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>Legal Company Name <span class="r">*</span></label>
+        <input type="text" id="co_name" placeholder="e.g. Premium Threads LLC" />
+      </div>
+      <div class="f">
+        <label>DBA / Trade Name</label>
+        <input type="text" id="co_dba" placeholder="If different" />
+      </div>
+      <div class="f">
+        <label>Vendor Type <span class="r">*</span></label>
+        <select id="co_type">
+          <option value="">Select...</option>
+          <option>Apparel Wholesaler</option>
+          <option>Embroidery/Decorator</option>
+          <option>Screen Printer</option>
+          <option>Promotional Products</option>
+          <option>Fulfillment/Warehousing</option>
+          <option>Technology/Software</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Federal Tax ID / EIN</label>
+        <input type="text" id="co_ein" placeholder="XX-XXXXXXX" />
+      </div>
+      <div class="f span2">
+        <label>Website</label>
+        <input type="url" id="co_web" placeholder="https://vendor.com" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Business Address -->
+  <div class="section">
+    <div class="section-title">Business Address</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>Street Address <span class="r">*</span></label>
+        <input type="text" id="bill_street" placeholder="123 Commerce Blvd, Suite 100" />
+      </div>
+      <div class="f">
+        <label>City <span class="r">*</span></label>
+        <input type="text" id="bill_city" />
+      </div>
+      <div class="f">
+        <label>State <span class="r">*</span></label>
+        <input type="text" id="bill_state" placeholder="FL" maxlength="2" style="text-transform:uppercase" />
+      </div>
+      <div class="f">
+        <label>ZIP <span class="r">*</span></label>
+        <input type="text" id="bill_zip" placeholder="33601" maxlength="10" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Primary Contact -->
+  <div class="section">
+    <div class="section-title">Primary Contact</div>
+    <div class="grid g2">
+      <div class="f">
+        <label>Full Name <span class="r">*</span></label>
+        <input type="text" id="ct_name" placeholder="First Last" />
+      </div>
+      <div class="f">
+        <label>Title</label>
+        <input type="text" id="ct_title" placeholder="e.g. Account Manager" />
+      </div>
+      <div class="f">
+        <label>Phone <span class="r">*</span></label>
+        <input type="tel" id="ct_phone" placeholder="(813) 555-0100" />
+      </div>
+      <div class="f">
+        <label>Email <span class="r">*</span></label>
+        <input type="email" id="ct_email" placeholder="name@vendor.com" />
+      </div>
+      <div class="f span2" style="border-top:1px solid #f0f0f0;padding-top:14px;margin-top:4px;">
+        <label>AP / Payment Email <span class="r">*</span></label>
+        <input type="email" id="ct_ap" placeholder="ap@vendor.com" />
+        <span class="hint">Where we send POs and remittances</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Payment Terms -->
+  <div class="section">
+    <div class="section-title">Payment Terms</div>
+    <div class="grid" style="gap:20px;">
+      <div class="f">
+        <label>Payment Terms <span class="r">*</span></label>
+        <div class="radios" style="margin-top:6px;">
+          <label><input type="radio" name="payment_terms" id="terms_net15" value="Net 15" /> Net 15</label>
+          <label><input type="radio" name="payment_terms" id="terms_net30" value="Net 30" /> Net 30</label>
+          <label><input type="radio" name="payment_terms" id="terms_net60" value="Net 60" /> Net 60</label>
+          <label><input type="radio" name="payment_terms" id="terms_due_receipt" value="Due on Receipt" /> Due on Receipt</label>
+        </div>
+      </div>
+      <div class="f">
+        <label>Preferred Payment Method</label>
+        <div class="radios" style="margin-top:6px;">
+          <label><input type="radio" name="pay_method" value="Check" onchange="toggleACH(this)" /> Check</label>
+          <label><input type="radio" name="pay_method" value="ACH/Wire Transfer" onchange="toggleACH(this)" /> ACH / Wire Transfer</label>
+          <label><input type="radio" name="pay_method" value="Credit Card" onchange="toggleACH(this)" /> Credit Card</label>
+        </div>
+      </div>
+      <div id="ach_fields">
+        <div class="grid g3">
+          <div class="f">
+            <label>Bank Name</label>
+            <input type="text" id="ach_bank" placeholder="Bank of America" />
+          </div>
+          <div class="f">
+            <label>Routing #</label>
+            <input type="text" id="ach_routing" placeholder="021000021" maxlength="9" />
+          </div>
+          <div class="f">
+            <label>Account #</label>
+            <input type="text" id="ach_account" placeholder="••••••••" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. 1099 Info -->
+  <div class="section">
+    <div class="section-title">1099 Info</div>
+    <div class="grid" style="gap:16px;">
+      <div class="f">
+        <label>Subject to 1099? <span class="r">*</span></label>
+        <div class="radios" style="margin-top:6px;">
+          <label><input type="radio" name="vendor_1099" value="Yes" onchange="toggle1099(this)" /> Yes</label>
+          <label><input type="radio" name="vendor_1099" value="No" onchange="toggle1099(this)" /> No</label>
+        </div>
+      </div>
+      <div id="tin_fields">
+        <div class="f">
+          <label>SSN / EIN for 1099</label>
+          <input type="text" id="tin_1099" placeholder="XX-XXXXXXX or XXX-XX-XXXX" />
+          <span class="hint">Required if subject to 1099 reporting</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Documents -->
+  <div class="section">
+    <div class="section-title">Documents</div>
+    <div class="grid g2">
+      <div class="f span2">
+        <label>W-9 Form</label>
+        <input type="file" id="w9_file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" />
+        <span class="hint">Required if subject to 1099 — PDF preferred, max 5MB</span>
+      </div>
+      <div class="f span2" style="border-top:1px solid #f0f0f0;padding-top:14px;margin-top:2px;">
+        <label>Logo / Branding Files</label>
+        <input type="file" id="logo_file" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg,.zip" class="file-input" />
+        <span class="hint">Optional — vector preferred (AI, EPS, SVG) or high-res PNG/JPG</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Agreement -->
+  <div class="section">
+    <div class="section-title">Agreement & Authorization</div>
+    <div class="terms">
+      <strong>Purchase Orders:</strong> All purchases will be initiated via official Merch'd POs. Deliverables and pricing must match the approved PO.<br><br>
+      <strong>Payment:</strong> Payment will be issued per the agreed terms above. Invoices must reference the applicable PO number and be sent to the AP email on file.<br><br>
+      <strong>Quality:</strong> Vendor is responsible for delivering goods and services that meet Merch'd quality standards. Defective or non-conforming goods must be replaced or credited promptly.<br><br>
+      <strong>Confidentiality:</strong> Vendor agrees to keep Merch'd customer information, pricing, and business data confidential. Information shared in the course of business may not be disclosed to third parties.<br><br>
+      <strong>Compliance:</strong> Vendor represents that it operates in compliance with all applicable laws, holds required licenses, and will notify Merch'd of any material changes to business status.
+    </div>
+    <label class="agree"><input type="checkbox" id="agree" /> I have read and agree to the terms above, and I am authorized to bind my company <span class="r">*</span></label>
+
+    <div class="grid g2" style="margin-top:18px;">
+      <div class="f">
+        <label>Authorized Name <span class="r">*</span></label>
+        <input type="text" id="sig_name" placeholder="Full legal name" />
+      </div>
+      <div class="f">
+        <label>Title <span class="r">*</span></label>
+        <input type="text" id="sig_title" placeholder="e.g. Owner, VP Sales" />
+      </div>
+      <div class="f">
+        <label>Date</label>
+        <input type="date" id="sig_date" readonly />
+      </div>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button class="btn-submit" onclick="submitForm()">Submit Vendor Setup</button>
+    <p class="footer-note">Your information is kept confidential and used only to set up your Merch'd vendor account.</p>
+  </div>
+
+</div>
+
+<script>
+// Set today's date
+document.getElementById('sig_date').value = new Date().toISOString().split('T')[0];
+
+// ACH toggle
+function toggleACH(radio) {
+  const achFields = document.getElementById('ach_fields');
+  if (radio.value === 'ACH/Wire Transfer') {
+    achFields.classList.add('visible');
+  } else {
+    achFields.classList.remove('visible');
+  }
+}
+
+// 1099 TIN toggle
+function toggle1099(radio) {
+  const tinFields = document.getElementById('tin_fields');
+  if (radio.value === 'Yes') {
+    tinFields.classList.add('visible');
+  } else {
+    tinFields.classList.remove('visible');
+  }
+}
+
+function val(id) { return (document.getElementById(id) || {}).value || ''; }
+function radio(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || ''; }
+
+async function submitForm() {
+  // Validate required fields
+  if (!val('co_name'))   { alert('Legal Company Name is required.'); return; }
+  if (!val('co_type') || val('co_type') === '') { alert('Vendor Type is required.'); return; }
+  if (!val('ct_name'))   { alert('Primary Contact Full Name is required.'); return; }
+  if (!val('ct_email'))  { alert('Contact Email is required.'); return; }
+  if (!val('ct_ap'))     { alert('AP / Payment Email is required.'); return; }
+  if (!val('sig_name'))  { alert('Authorized Name is required.'); return; }
+  if (!document.getElementById('agree').checked) { alert('Please agree to the terms.'); return; }
+
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+
+  const payTerms  = radio('payment_terms');
+  const payMethod = radio('pay_method');
+  const is1099    = radio('vendor_1099');
+
+  const fd = new FormData();
+  fd.append('access_key',   'adf9a778-fa2d-43a0-9f47-86587b2a8f63');
+  fd.append('form_type',    'vendor');
+  fd.append('to',           'info@merchd.co');
+  fd.append('subject',      "New Merch'd Vendor Setup — " + val('co_name'));
+  fd.append('from_name',    val('ct_name'));
+  fd.append('email',        val('ct_email'));
+
+  // Company
+  fd.append('Legal Company Name',  val('co_name'));
+  fd.append('DBA',                 val('co_dba'));
+  fd.append('Vendor Type',         val('co_type'));
+  fd.append('Federal Tax ID (EIN)',val('co_ein'));
+  fd.append('Website',             val('co_web'));
+
+  // Address
+  fd.append('Business Street', val('bill_street'));
+  fd.append('Business City',   val('bill_city'));
+  fd.append('Business State',  val('bill_state').toUpperCase());
+  fd.append('Business Zip',    val('bill_zip'));
+
+  // Contact
+  fd.append('Primary Contact Name', val('ct_name'));
+  fd.append('Contact Title',        val('ct_title'));
+  fd.append('Contact Phone',        val('ct_phone'));
+  fd.append('AP Payment Email',     val('ct_ap'));
+
+  // Payment
+  fd.append('Payment Terms',  payTerms);
+  fd.append('Payment Method', payMethod);
+  if (payMethod === 'ACH/Wire Transfer') {
+    fd.append('ACH Bank Name',   val('ach_bank'));
+    fd.append('ACH Routing',     val('ach_routing'));
+    fd.append('ACH Account',     val('ach_account'));
+  }
+
+  // 1099
+  fd.append('Subject to 1099', is1099);
+  if (is1099 === 'Yes') {
+    fd.append('1099 TIN', val('tin_1099'));
+  }
+
+  // Signature
+  fd.append('Authorized Name',  val('sig_name'));
+  fd.append('Authorized Title', val('sig_title'));
+  fd.append('Signature Date',   val('sig_date'));
+  fd.append('Submitted At',     new Date().toISOString());
+
+  // Files
+  const w9File   = document.getElementById('w9_file').files[0];
+  const logoFile = document.getElementById('logo_file').files[0];
+  if (w9File)   fd.append('W-9 Form',        w9File,   w9File.name);
+  if (logoFile) fd.append('Logo / Branding', logoFile, logoFile.name);
+
+  try {
+    // Submit to Web3Forms
+    const w3res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+    const w3data = await w3res.json();
+    if (!w3data.success) throw new Error(w3data.message);
+
+    btn.textContent    = '✅ Submitted!';
+    btn.style.background = '#276749';
+    document.querySelector('.footer-note').textContent = "We've received your vendor setup and will be in touch within 1 business day. Welcome to the Merch'd network!";
+    setTimeout(() => { window.location.href = 'https://merchd.co/?vendor_submitted=1'; }, 2000);
+
+    // Discord webhook notification
+    await fetch('https://discord.com/api/webhooks/1491954028966580365/8Vz3O6m2HqU1xHwRKkdLGATVe99pfTHPm0nZvyKsh1pWPfQ9v_dG0PSNYnCKjKnNASnz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: "Merch'd Forms",
+        embeds: [{
+          title: '🏭 New Vendor Setup Submitted',
+          color: 0xE8793A,
+          fields: [
+            { name: 'Company',       value: val('co_name'),            inline: true },
+            { name: 'Vendor Type',   value: val('co_type') || 'N/A',   inline: true },
+            { name: 'Contact',       value: val('ct_name'),            inline: true },
+            { name: 'Email',         value: val('ct_email'),           inline: true },
+            { name: 'Phone',         value: val('ct_phone') || 'N/A',  inline: true },
+            { name: 'Pay Terms',     value: payTerms || 'N/A',         inline: true },
+            { name: 'Pay Method',    value: payMethod || 'N/A',        inline: true },
+            { name: '1099',          value: is1099 || 'N/A',           inline: true },
+          ],
+          footer: { text: 'vendor-setup.merchd.co' },
+          timestamp: new Date().toISOString()
+        }]
+      })
+    });
+
+  } catch(e) {
+    btn.textContent = 'Submit Vendor Setup';
+    btn.disabled    = false;
+    alert('There was an issue submitting. Please email info@merchd.co directly or try again.');
+    console.error('Submit error:', e);
+  }
+}
+</script>
+</body>
+</html>
