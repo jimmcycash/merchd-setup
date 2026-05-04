@@ -392,6 +392,7 @@ async function submitForm() {
 
   try {
     const web3Fd = cloneFormData(fd, { skipFiles: true });
+    web3Fd.append('web3forms_tracking_only', '1');
     web3Fd.append('Uploaded Files', [
       logoFile ? 'Company Logo: ' + logoFile.name : null,
       w9File ? 'W-9 Form: ' + w9File.name : null,

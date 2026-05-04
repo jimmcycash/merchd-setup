@@ -404,6 +404,7 @@ async function submitForm() {
   try {
     // Submit a tracking-only copy to Web3Forms: email + dashboard history, no file blobs.
     const web3Fd = cloneFormData(fd, { skipFiles: true });
+    web3Fd.append('web3forms_tracking_only', '1');
     web3Fd.append('Uploaded Files', [
       w9File ? 'W-9 Form: ' + w9File.name : null,
       logoFile ? 'Logo / Branding: ' + logoFile.name : null,
