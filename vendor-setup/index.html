@@ -85,7 +85,7 @@
 
   <div class="header">
     <div class="logo-banner">
-      <img src="merchd-logo-dark.png" alt="Merch'd Apparel" />
+      <img src="https://raw.githubusercontent.com/jimmcycash/merchd-setup/main/merchd-logo-dark.png" alt="Merch'd Apparel" />
       <div class="logo-tagline">Premium Branded Merchandise</div>
     </div>
     <h1>New Vendor Setup</h1>
@@ -318,6 +318,11 @@ function toggle1099(radio) {
 
 function val(id) { return (document.getElementById(id) || {}).value || ''; }
 function radio(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || ''; }
+function cloneFormData(source) {
+  const copy = new FormData();
+  for (const [key, value] of source.entries()) copy.append(key, value);
+  return copy;
+}
 
 async function submitForm() {
   // Validate required fields
@@ -392,41 +397,30 @@ async function submitForm() {
   if (logoFile) fd.append('Logo / Branding', logoFile, logoFile.name);
 
   try {
-    // Submit to Web3Forms
-    const w3res  = await fetch('https://api.web3forms.com/submit', { method: 'POST', body: fd });
+    // Submit to Web3Forms first so Mike gets the normal email notification and
+    // the submission appears in the Web3Forms dashboard/history.
+    const w3res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: fd
+    });
     const w3data = await w3res.json();
-    if (!w3data.success) throw new Error(w3data.message);
+    if (!w3data.success) throw new Error(w3data.message || 'Web3Forms submission failed');
+
+    // Then submit the same packet to Merch'd automation backend. This creates/updates
+    // the QuickBooks vendor, creates the OneDrive vendor folder package, files uploads,
+    // and sends the Discord/email intake notices.
+    const automationFd = cloneFormData(fd);
+    automationFd.delete('access_key');
+    const resp = await fetch('https://webhook.merchd.co/webhook', {
+      method: 'POST',
+      body: automationFd
+    });
+    if (!resp.ok) throw new Error('Automation webhook failed: ' + resp.status);
 
     btn.textContent    = '✅ Submitted!';
     btn.style.background = '#276749';
     document.querySelector('.footer-note').textContent = "We've received your vendor setup and will be in touch within 1 business day. Welcome to the Merch'd network!";
     setTimeout(() => { window.location.href = 'https://merchd.co/?vendor_submitted=1'; }, 2000);
-
-    // Discord webhook notification
-    await fetch('https://discord.com/api/webhooks/1491954028966580365/8Vz3O6m2HqU1xHwRKkdLGATVe99pfTHPm0nZvyKsh1pWPfQ9v_dG0PSNYnCKjKnNASnz', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: "Merch'd Forms",
-        embeds: [{
-          title: '🏭 New Vendor Setup Submitted',
-          color: 0xE8793A,
-          fields: [
-            { name: 'Company',       value: val('co_name'),            inline: true },
-            { name: 'Vendor Type',   value: val('co_type') || 'N/A',   inline: true },
-            { name: 'Contact',       value: val('ct_name'),            inline: true },
-            { name: 'Email',         value: val('ct_email'),           inline: true },
-            { name: 'Phone',         value: val('ct_phone') || 'N/A',  inline: true },
-            { name: 'Pay Terms',     value: payTerms || 'N/A',         inline: true },
-            { name: 'Pay Method',    value: payMethod || 'N/A',        inline: true },
-            { name: '1099',          value: is1099 || 'N/A',           inline: true },
-          ],
-          footer: { text: 'vendor-setup.merchd.co' },
-          timestamp: new Date().toISOString()
-        }]
-      })
-    });
-
   } catch(e) {
     btn.textContent = 'Submit Vendor Setup';
     btn.disabled    = false;
