@@ -328,6 +328,15 @@ canvas.addEventListener('touchend', () => drawing = false);
 function clearSig() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
 
 function val(id) { return (document.getElementById(id) || {}).value || ''; }
+function cloneFormData(source, options = {}) {
+  const copy = new FormData();
+  const skipFiles = options.skipFiles || false;
+  for (const [key, value] of source.entries()) {
+    if (skipFiles && value instanceof File) continue;
+    copy.append(key, value);
+  }
+  return copy;
+}
 
 async function submitForm() {
   if (!document.getElementById('agree').checked) { alert('Please agree to the terms.'); return; }
@@ -348,6 +357,7 @@ async function submitForm() {
 
   const fd = new FormData();
   fd.append('access_key', 'adf9a778-fa2d-43a0-9f47-86587b2a8f63');
+  fd.append('form_type', 'customer');
   fd.append('to', 'info@merchd.co,matt@merchd.co');
   fd.append('subject', 'New Merch\'d Customer Setup — ' + val('co_name'));
   fd.append('from_name', val('ct_name'));
@@ -373,19 +383,35 @@ async function submitForm() {
   fd.append('Signature Date', val('sig_date'));
   fd.append('Submitted At', new Date().toISOString());
 
-  // Attach files
+  // Files go only to Merch'd automation/OneDrive. Web3Forms gets file names only
+  // so Proofpoint/Outlook does not wrap/block third-party attachment links.
   const logoFile = document.getElementById('logo_file').files[0];
   const w9File = document.getElementById('w9_file').files[0];
   if (logoFile) fd.append('Company Logo', logoFile, logoFile.name);
   if (w9File) fd.append('W-9 Form', w9File, w9File.name);
 
   try {
+    const web3Fd = cloneFormData(fd, { skipFiles: true });
+    web3Fd.append('Uploaded Files', [
+      logoFile ? 'Company Logo: ' + logoFile.name : null,
+      w9File ? 'W-9 Form: ' + w9File.name : null,
+    ].filter(Boolean).join(' | ') || 'None');
+    web3Fd.append('Attachment Location', 'Files are saved by Merch'd automation to OneDrive customer folder; do not use Web3Forms attachment links.');
     const w3res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      body: fd
+      body: web3Fd
     });
     const w3data = await w3res.json();
     if (!w3data.success) throw new Error(w3data.message);
+
+    // Send the full packet, including files, to Merch'd automation for QuickBooks + OneDrive.
+    const automationFd = cloneFormData(fd);
+    automationFd.delete('access_key');
+    const automationRes = await fetch('https://webhook.merchd.co/webhook', {
+      method: 'POST',
+      body: automationFd
+    });
+    if (!automationRes.ok) throw new Error('Automation webhook failed: ' + automationRes.status);
 
     btn.textContent = '✅ Submitted!';
     btn.style.background = '#276749';

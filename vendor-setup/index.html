@@ -318,9 +318,13 @@ function toggle1099(radio) {
 
 function val(id) { return (document.getElementById(id) || {}).value || ''; }
 function radio(name) { return document.querySelector(`input[name="${name}"]:checked`)?.value || ''; }
-function cloneFormData(source) {
+function cloneFormData(source, options = {}) {
   const copy = new FormData();
-  for (const [key, value] of source.entries()) copy.append(key, value);
+  const skipFiles = options.skipFiles || false;
+  for (const [key, value] of source.entries()) {
+    if (skipFiles && value instanceof File) continue;
+    copy.append(key, value);
+  }
   return copy;
 }
 
@@ -390,18 +394,24 @@ async function submitForm() {
   fd.append('Signature Date',   val('sig_date'));
   fd.append('Submitted At',     new Date().toISOString());
 
-  // Files
+  // Files go only to Merch'd automation/OneDrive. Web3Forms gets file names only
+  // so Proofpoint/Outlook does not wrap/block third-party attachment links.
   const w9File   = document.getElementById('w9_file').files[0];
   const logoFile = document.getElementById('logo_file').files[0];
   if (w9File)   fd.append('W-9 Form',        w9File,   w9File.name);
   if (logoFile) fd.append('Logo / Branding', logoFile, logoFile.name);
 
   try {
-    // Submit to Web3Forms first so Mike gets the normal email notification and
-    // the submission appears in the Web3Forms dashboard/history.
+    // Submit a tracking-only copy to Web3Forms: email + dashboard history, no file blobs.
+    const web3Fd = cloneFormData(fd, { skipFiles: true });
+    web3Fd.append('Uploaded Files', [
+      w9File ? 'W-9 Form: ' + w9File.name : null,
+      logoFile ? 'Logo / Branding: ' + logoFile.name : null,
+    ].filter(Boolean).join(' | ') || 'None');
+    web3Fd.append('Attachment Location', 'Files are saved by Merch'd automation to OneDrive vendor folder; do not use Web3Forms attachment links.');
     const w3res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
-      body: fd
+      body: web3Fd
     });
     const w3data = await w3res.json();
     if (!w3data.success) throw new Error(w3data.message || 'Web3Forms submission failed');
