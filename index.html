@@ -410,7 +410,7 @@ async function submitForm() {
       logoFile ? 'Company Logo: ' + logoFile.name : null,
       w9File ? 'W-9 Form: ' + w9File.name : null,
     ].filter(Boolean).join(' | ') || 'None');
-    web3Fd.append('Attachment Location', 'Files are saved by Merch'd automation to OneDrive customer folder; do not use Web3Forms attachment links.');
+    web3Fd.append('Attachment Location', "Files are saved by Merch'd automation to OneDrive customer folder; do not use Web3Forms attachment links.");
     const w3res = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       body: web3Fd
