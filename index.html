@@ -231,13 +231,13 @@
     <div class="grid g2">
       <div class="f span2">
         <label>Company Logo <span class="r">*</span></label>
-        <input type="file" id="logo_file" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" class="file-input" required />
-        <span class="hint">Vector preferred (AI, EPS, SVG) or high-res PNG/JPG — max 20MB</span>
+        <input type="file" id="logo_file" accept=".pdf,.ai,.eps,.svg,.png,.jpg,.jpeg" class="file-input" />
+        <span class="hint">Optional but recommended — vector preferred (AI, EPS, SVG) or high-res PNG/JPG, max 20MB</span>
       </div>
       <div class="f span2" style="border-top:1px solid #f0f0f0;padding-top:14px;margin-top:2px;">
-        <label>W-9 Form <span class="r">*</span></label>
-        <input type="file" id="w9_file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" required />
-        <span class="hint">Required for account setup — PDF preferred, max 5MB</span>
+        <label>W-9 Form</label>
+        <input type="file" id="w9_file" accept=".pdf,.jpg,.jpeg,.png" class="file-input" />
+        <span class="hint">Optional now; upload if available — PDF preferred, max 5MB</span>
       </div>
     </div>
   </div>
@@ -349,10 +349,8 @@ async function submitForm() {
 
   const logoFile = document.getElementById('logo_file').files[0];
   const w9File = document.getElementById('w9_file').files[0];
-  if (!logoFile) { alert('Company logo is required. Please upload a vector logo or high-res image.'); return; }
-  if (!w9File) { alert('W-9 form is required. Please upload a PDF or image copy.'); return; }
-  if (logoFile.size > 20 * 1024 * 1024) { alert('Company logo must be 20MB or smaller.'); return; }
-  if (w9File.size > 5 * 1024 * 1024) { alert('W-9 form must be 5MB or smaller.'); return; }
+  if (logoFile && logoFile.size > 20 * 1024 * 1024) { alert('Company logo must be 20MB or smaller.'); return; }
+  if (w9File && w9File.size > 5 * 1024 * 1024) { alert('W-9 form must be 5MB or smaller.'); return; }
 
   const btn = document.querySelector('.btn-submit');
   btn.textContent = 'Submitting...';
@@ -392,8 +390,8 @@ async function submitForm() {
 
   // Files go only to Merch'd automation/OneDrive. Web3Forms gets file names only
   // so Proofpoint/Outlook does not wrap/block third-party attachment links.
-  fd.append('Company Logo', logoFile, logoFile.name);
-  fd.append('W-9 Form', w9File, w9File.name);
+  if (logoFile) fd.append('Company Logo', logoFile, logoFile.name);
+  if (w9File) fd.append('W-9 Form', w9File, w9File.name);
 
   try {
     // Send the full packet, including files, to Merch'd automation for QuickBooks + OneDrive first.
