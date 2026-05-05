@@ -404,46 +404,55 @@ async function submitForm() {
     });
     if (!automationRes.ok) throw new Error('Automation webhook failed: ' + automationRes.status);
 
-    const web3Fd = cloneFormData(fd, { skipFiles: true });
-    web3Fd.append('web3forms_tracking_only', '1');
-    web3Fd.append('Uploaded Files', [
-      logoFile ? 'Company Logo: ' + logoFile.name : null,
-      w9File ? 'W-9 Form: ' + w9File.name : null,
-    ].filter(Boolean).join(' | ') || 'None');
-    web3Fd.append('Attachment Location', "Files are saved by Merch'd automation to OneDrive customer folder; do not use Web3Forms attachment links.");
-    const w3res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      body: web3Fd
-    });
-    const w3data = await w3res.json();
-    if (!w3data.success) throw new Error(w3data.message);
-
     btn.textContent = '✅ Submitted!';
     btn.style.background = '#276749';
     document.querySelector('.footer-note').textContent = "We\'ve received your setup form and will follow up within 1 business day. Welcome aboard!";
     setTimeout(() => { window.location.href = 'https://merchd.co/?submitted=1'; }, 2000);
 
-    // Discord notification
-    await fetch('https://discord.com/api/webhooks/1491954028966580365/8Vz3O6m2HqU1xHwRKkdLGATVe99pfTHPm0nZvyKsh1pWPfQ9v_dG0PSNYnCKjKnNASnz', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: "Merch\'d Forms",
-        embeds: [{
-          title: '🧢 New Customer Setup Submitted',
-          color: 1842720,
-          fields: [
-            { name: 'Company', value: val('co_name'), inline: true },
-            { name: 'Contact', value: val('ct_name'), inline: true },
-            { name: 'Email', value: val('ct_email'), inline: true },
-            { name: 'Phone', value: val('ct_phone') || 'N/A', inline: true },
-            { name: 'Payment', value: payMethod || 'N/A', inline: true },
-          ],
-          footer: { text: 'Full details sent to mike@merchd.co' },
-          timestamp: new Date().toISOString()
-        }]
-      })
-    });
+    // Tracking copies are best-effort only. The Merch'd automation webhook above is the source of truth.
+    // Never make the customer see a failed submission after QuickBooks/OneDrive already accepted it.
+    try {
+      const web3Fd = cloneFormData(fd, { skipFiles: true });
+      web3Fd.append('web3forms_tracking_only', '1');
+      web3Fd.append('Uploaded Files', [
+        logoFile ? 'Company Logo: ' + logoFile.name : null,
+        w9File ? 'W-9 Form: ' + w9File.name : null,
+      ].filter(Boolean).join(' | ') || 'None');
+      web3Fd.append('Attachment Location', "Files are saved by Merch'd automation to OneDrive customer folder; do not use Web3Forms attachment links.");
+      const w3res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: web3Fd
+      });
+      const w3data = await w3res.json();
+      if (!w3data.success) console.warn('Web3Forms tracking copy failed:', w3data.message);
+    } catch (trackingError) {
+      console.warn('Web3Forms tracking copy failed:', trackingError);
+    }
+
+    try {
+      await fetch('https://discord.com/api/webhooks/1491954028966580365/8Vz3O6m2HqU1xHwRKkdLGATVe99pfTHPm0nZvyKsh1pWPfQ9v_dG0PSNYnCKjKnNASnz', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: "Merch\'d Forms",
+          embeds: [{
+            title: '🧢 New Customer Setup Submitted',
+            color: 1842720,
+            fields: [
+              { name: 'Company', value: val('co_name'), inline: true },
+              { name: 'Contact', value: val('ct_name'), inline: true },
+              { name: 'Email', value: val('ct_email'), inline: true },
+              { name: 'Phone', value: val('ct_phone') || 'N/A', inline: true },
+              { name: 'Payment', value: payMethod || 'N/A', inline: true },
+            ],
+            footer: { text: 'Full details sent to mike@merchd.co' },
+            timestamp: new Date().toISOString()
+          }]
+        })
+      });
+    } catch (discordError) {
+      console.warn('Browser Discord notification failed:', discordError);
+    }
 
   } catch(e) {
     btn.textContent = 'Submit Account Setup';
