@@ -402,24 +402,8 @@ async function submitForm() {
   if (logoFile) fd.append('Logo / Branding', logoFile, logoFile.name);
 
   try {
-    // Submit a tracking-only copy to Web3Forms: email + dashboard history, no file blobs.
-    const web3Fd = cloneFormData(fd, { skipFiles: true });
-    web3Fd.append('web3forms_tracking_only', '1');
-    web3Fd.append('Uploaded Files', [
-      w9File ? 'W-9 Form: ' + w9File.name : null,
-      logoFile ? 'Logo / Branding: ' + logoFile.name : null,
-    ].filter(Boolean).join(' | ') || 'None');
-    web3Fd.append('Attachment Location', 'Files are saved by Merch'd automation to OneDrive vendor folder; do not use Web3Forms attachment links.');
-    const w3res = await fetch('https://api.web3forms.com/submit', {
-      method: 'POST',
-      body: web3Fd
-    });
-    const w3data = await w3res.json();
-    if (!w3data.success) throw new Error(w3data.message || 'Web3Forms submission failed');
-
-    // Then submit the same packet to Merch'd automation backend. This creates/updates
-    // the QuickBooks vendor, creates the OneDrive vendor folder package, files uploads,
-    // and sends the Discord/email intake notices.
+    // Merch'd automation is the source of truth. It creates/updates the QB vendor,
+    // files uploads to OneDrive, and sends routed Discord/email intake notices.
     const automationFd = cloneFormData(fd);
     automationFd.delete('access_key');
     const resp = await fetch('https://webhook.merchd.co/webhook', {
@@ -432,6 +416,26 @@ async function submitForm() {
     btn.style.background = '#276749';
     document.querySelector('.footer-note').textContent = "We've received your vendor setup and will be in touch within 1 business day. Welcome to the Merch'd network!";
     setTimeout(() => { window.location.href = 'https://merchd.co/?vendor_submitted=1'; }, 2000);
+
+    // Tracking copy is best-effort only. Never block QuickBooks/OneDrive intake
+    // because Web3Forms/email tracking failed.
+    try {
+      const web3Fd = cloneFormData(fd, { skipFiles: true });
+      web3Fd.append('web3forms_tracking_only', '1');
+      web3Fd.append('Uploaded Files', [
+        w9File ? 'W-9 Form: ' + w9File.name : null,
+        logoFile ? 'Logo / Branding: ' + logoFile.name : null,
+      ].filter(Boolean).join(' | ') || 'None');
+      web3Fd.append('Attachment Location', 'Files are saved by Merch\'d automation to OneDrive vendor folder; do not use Web3Forms attachment links.');
+      const w3res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: web3Fd
+      });
+      const w3data = await w3res.json();
+      if (!w3data.success) console.warn('Web3Forms tracking copy failed:', w3data.message);
+    } catch (trackingError) {
+      console.warn('Web3Forms tracking copy failed:', trackingError);
+    }
   } catch(e) {
     btn.textContent = 'Submit Vendor Setup';
     btn.disabled    = false;

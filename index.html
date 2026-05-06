@@ -429,30 +429,8 @@ async function submitForm() {
       console.warn('Web3Forms tracking copy failed:', trackingError);
     }
 
-    try {
-      await fetch('https://discord.com/api/webhooks/1491954028966580365/8Vz3O6m2HqU1xHwRKkdLGATVe99pfTHPm0nZvyKsh1pWPfQ9v_dG0PSNYnCKjKnNASnz', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: "Merch\'d Forms",
-          embeds: [{
-            title: '🧢 New Customer Setup Submitted',
-            color: 1842720,
-            fields: [
-              { name: 'Company', value: val('co_name'), inline: true },
-              { name: 'Contact', value: val('ct_name'), inline: true },
-              { name: 'Email', value: val('ct_email'), inline: true },
-              { name: 'Phone', value: val('ct_phone') || 'N/A', inline: true },
-              { name: 'Payment', value: payMethod || 'N/A', inline: true },
-            ],
-            footer: { text: 'Full details sent to mike@merchd.co' },
-            timestamp: new Date().toISOString()
-          }]
-        })
-      });
-    } catch (discordError) {
-      console.warn('Browser Discord notification failed:', discordError);
-    }
+    // Discord notifications are sent by the trusted Merch'd automation backend only.
+    // Do not post browser-side Discord webhooks; they drifted into #reports and duplicated backend alerts.
 
   } catch(e) {
     btn.textContent = 'Submit Account Setup';
