@@ -279,8 +279,9 @@
         <input type="text" id="sig_title" placeholder="e.g. Owner, VP Sales" />
       </div>
       <div class="f">
-        <label>Date</label>
-        <input type="date" id="sig_date" readonly />
+        <label>Date <span class="r">*</span></label>
+        <input type="date" id="sig_date" />
+        <span class="hint">Auto-filled to today; editable if needed</span>
       </div>
     </div>
   </div>
@@ -293,8 +294,14 @@
 </div>
 
 <script>
-// Set today's date
-document.getElementById('sig_date').value = new Date().toISOString().split('T')[0];
+// Set today's date in the visitor's local timezone. Keep the field editable because
+// some browsers/mail in-app webviews do not expose readonly date inputs properly.
+function todayLocalISO() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().split('T')[0];
+}
+document.getElementById('sig_date').value = todayLocalISO();
 
 // ACH toggle
 function toggleACH(radio) {
@@ -336,6 +343,8 @@ async function submitForm() {
   if (!val('ct_email'))  { alert('Contact Email is required.'); return; }
   if (!val('ct_ap'))     { alert('AP / Payment Email is required.'); return; }
   if (!val('sig_name'))  { alert('Authorized Name is required.'); return; }
+  if (!val('sig_title')) { alert('Authorized Title is required.'); return; }
+  if (!val('sig_date'))  { alert('Signature Date is required.'); return; }
   if (!document.getElementById('agree').checked) { alert('Please agree to the terms.'); return; }
 
   const btn = document.querySelector('.btn-submit');
