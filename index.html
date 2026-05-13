@@ -338,6 +338,24 @@ function cloneFormData(source, options = {}) {
   return copy;
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function showSubmitted(message) {
+  const btn = document.querySelector('.btn-submit');
+  btn.textContent = '✅ Submitted!';
+  btn.style.background = '#276749';
+  document.querySelector('.footer-note').textContent = message || "We've received your setup form and will follow up within 1 business day. Welcome aboard!";
+  setTimeout(() => { window.location.href = 'https://merchd.co/?submitted=1'; }, 2000);
+}
+
 async function submitForm() {
   if (!document.getElementById('agree').checked) { alert('Please agree to the terms.'); return; }
   if (!val('co_name')) { alert('Company name is required.'); return; }
@@ -395,19 +413,16 @@ async function submitForm() {
 
   try {
     // Send the full packet, including files, to Merch'd automation for QuickBooks + OneDrive first.
-    // This prevents a text-only Web3Forms record from being created when required uploads are missing/failing.
+    // If the Mac Studio/tunnel is offline, fail fast to the cloud fallback instead of trapping the customer.
     const automationFd = cloneFormData(fd);
     automationFd.delete('access_key');
-    const automationRes = await fetch('https://webhook.merchd.co/webhook', {
+    const automationRes = await fetchWithTimeout('https://webhook.merchd.co/webhook', {
       method: 'POST',
       body: automationFd
-    });
+    }, 8000);
     if (!automationRes.ok) throw new Error('Automation webhook failed: ' + automationRes.status);
 
-    btn.textContent = '✅ Submitted!';
-    btn.style.background = '#276749';
-    document.querySelector('.footer-note').textContent = "We\'ve received your setup form and will follow up within 1 business day. Welcome aboard!";
-    setTimeout(() => { window.location.href = 'https://merchd.co/?submitted=1'; }, 2000);
+    showSubmitted("We've received your setup form and will follow up within 1 business day. Welcome aboard!");
 
     // Tracking copies are best-effort only. The Merch'd automation webhook above is the source of truth.
     // Never make the customer see a failed submission after QuickBooks/OneDrive already accepted it.
@@ -419,10 +434,10 @@ async function submitForm() {
         w9File ? 'W-9 Form: ' + w9File.name : null,
       ].filter(Boolean).join(' | ') || 'None');
       web3Fd.append('Attachment Location', "Files are saved by Merch'd automation to OneDrive customer folder; do not use Web3Forms attachment links.");
-      const w3res = await fetch('https://api.web3forms.com/submit', {
+      const w3res = await fetchWithTimeout('https://api.web3forms.com/submit', {
         method: 'POST',
         body: web3Fd
-      });
+      }, 10000);
       const w3data = await w3res.json();
       if (!w3data.success) console.warn('Web3Forms tracking copy failed:', w3data.message);
     } catch (trackingError) {
@@ -433,10 +448,23 @@ async function submitForm() {
     // Do not post browser-side Discord webhooks; they drifted into #reports and duplicated backend alerts.
 
   } catch(e) {
-    btn.textContent = 'Submit Account Setup';
-    btn.disabled = false;
-    alert('There was an issue submitting. Please email info@merchd.com directly or try again.');
-    console.error('EmailJS error:', e);
+    console.warn('Primary Merch\'d automation unavailable; trying cloud fallback:', e);
+    try {
+      const fallbackFd = cloneFormData(fd);
+      fallbackFd.append('cloud_fallback', '1');
+      fallbackFd.append('fallback_reason', String(e && e.message ? e.message : e));
+      const fallbackRes = await fetchWithTimeout('https://merchd-form-fallback.mikeaero44.workers.dev/webhook', {
+        method: 'POST',
+        body: fallbackFd
+      }, 20000);
+      if (!fallbackRes.ok) throw new Error('Cloud fallback failed: ' + fallbackRes.status);
+      showSubmitted("We've received your setup form. Our backup intake caught it and we'll follow up within 1 business day.");
+    } catch(fallbackError) {
+      btn.textContent = 'Submit Account Setup';
+      btn.disabled = false;
+      alert('There was an issue submitting. Please email info@merchd.com directly or try again.');
+      console.error('Merch\'d submit failed:', fallbackError);
+    }
   }
 }
 </script>
