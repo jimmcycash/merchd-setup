@@ -20,7 +20,7 @@
 <div id="app" class="page hidden">
   <div class="header">
     <div class="logo-banner">
-      <img src="merchd-logo-dark.png" alt="Merch'd Apparel">
+      <img src="/merchd-logo-dark.png" alt="Merch'd Apparel">
       <div class="logo-tagline">Premium Branded Merchandise</div>
     </div>
     <h1>Order Entry Form</h1>
@@ -42,10 +42,10 @@
     <div class="section">
       <div class="section-title">Customer Information</div>
       <div class="grid g2">
-        <div class="f span2"><label>Customer Company Name <span class="r">*</span></label><input name="Customer Company Name" required placeholder="Must already exist in QuickBooks"></div>
-        <div class="f"><label>Customer Contact Name</label><input name="Customer Contact Name"></div>
-        <div class="f"><label>Customer Email</label><input name="Customer Email" type="email"></div>
-        <div class="f span2"><label>Ship To Address <span class="r">*</span></label><textarea name="Ship To Address" required placeholder="Street, city, state, zip"></textarea></div>
+        <div class="f span2"><label>Customer Company Name <span class="r">*</span></label><select id="customer_select" required><option value="">Unlock to load QuickBooks customers...</option></select><input type="hidden" name="Customer QB ID" id="customer_qb_id"><input type="hidden" name="Customer Company Name" id="customer_company_name"></div>
+        <div class="f"><label>Customer Contact Name</label><input name="Customer Contact Name" id="customer_contact_name"></div>
+        <div class="f"><label>Customer Email</label><input name="Customer Email" id="customer_email" type="email"></div>
+        <div class="f span2"><label>Ship To Address <span class="r">*</span></label><textarea name="Ship To Address" id="ship_to_address" required placeholder="Select a QB customer to autofill ship-to address"></textarea></div>
         <div class="f"><label>Customer In-Hands Date</label><input name="Customer In-Hands Date" type="date"></div>
         <div class="f"><label>Customer PO #</label><input name="Customer PO #"></div>
         <div class="f span2"><label>Internal Job / Order Name</label><input name="Job Name" placeholder="e.g. Tampa Golf Outing Polos"></div>
@@ -61,7 +61,7 @@
     <div class="section">
       <div class="section-title">Product Vendor Information</div>
       <div class="grid g3">
-        <div class="f span2"><label>Product Vendor Name <span class="r">*</span></label><input name="Product Vendor Name" required placeholder="Must already exist in QuickBooks"></div>
+        <div class="f span2"><label>Product Vendor Name <span class="r">*</span></label><select id="product_vendor_select" required><option value="">Unlock to load QuickBooks vendors...</option></select><input type="hidden" name="Product Vendor QB ID" id="product_vendor_qb_id"><input type="hidden" name="Product Vendor Name" id="product_vendor_name"></div>
         <div class="f"><label>Send Product Vendor PO?</label><select name="Send Product Vendor PO"><option>Yes</option><option>No</option></select></div>
         <div class="f"><label>Vendor Setup Fee</label><input name="Product Vendor Setup Fee" type="number" min="0" step="0.01"></div>
         <div class="f"><label>Vendor Digitizing Fee</label><input name="Product Vendor Digitizing Fee" type="number" min="0" step="0.01"></div>
@@ -73,7 +73,7 @@
     <div class="section">
       <div class="section-title">Decoration Details</div>
       <div class="grid g3">
-        <div class="f span2"><label>Decoration Vendor Name</label><input name="Decoration Vendor Name" placeholder="Leave blank if no separate decorator"></div>
+        <div class="f span2"><label>Decoration Vendor Name</label><select id="decoration_vendor_select"><option value="">No separate decoration vendor / same vendor</option></select><input type="hidden" name="Decoration Vendor QB ID" id="decoration_vendor_qb_id"><input type="hidden" name="Decoration Vendor Name" id="decoration_vendor_name"></div>
         <div class="f"><label>Send Decoration Vendor PO?</label><select name="Send Decoration Vendor PO"><option>No</option><option>Yes</option></select></div>
         <div class="f"><label>Embellishment Type</label><input name="Embellishment Type" placeholder="Embroidery, print, patch, etc."></div>
         <div class="f"><label>Logo Placement</label><input name="Logo Placement" placeholder="Left chest, front hat, sleeve"></div>
@@ -111,6 +111,13 @@
 <script>
 const PASSWORD_HASH = '715b048fd34492483a0f6ef0af6622df6849e4f8dc5fb458d41a06c7b5bd5daa';
 const WEBHOOK_URL = 'https://webhook.merchd.co/webhook';
+const ENTITIES_URL = 'https://webhook.merchd.co/order-entry/entities';
+let qbEntities = { customers: [], vendors: [] };
+function optionLabel(e){return `${e.name || 'Unnamed'}${e.email ? ' — '+e.email : ''}`;}
+function setOptions(selectId, list, placeholder){const sel=document.getElementById(selectId);sel.innerHTML=`<option value="">${placeholder}</option>`+list.map(e=>`<option value="${e.id}">${optionLabel(e).replace(/</g,'&lt;')}</option>`).join('');}
+async function loadQbEntities(password){const fd=new FormData();fd.set('Order Entry Password',password);const res=await fetch(ENTITIES_URL,{method:'POST',body:fd});if(!res.ok)throw new Error('Could not load QuickBooks customer/vendor lists');qbEntities=await res.json();setOptions('customer_select',qbEntities.customers,'Select a QuickBooks customer...');setOptions('product_vendor_select',qbEntities.vendors,'Select a QuickBooks product vendor...');setOptions('decoration_vendor_select',qbEntities.vendors,'No separate decoration vendor / same vendor');}
+function findById(list,id){return list.find(e=>String(e.id)===String(id));}
+function bindEntitySelectors(){document.getElementById('customer_select').addEventListener('change',e=>{const c=findById(qbEntities.customers,e.target.value)||{};document.getElementById('customer_qb_id').value=c.id||'';document.getElementById('customer_company_name').value=c.name||'';document.getElementById('customer_email').value=c.email||'';document.getElementById('ship_to_address').value=c.shipToText||'';});document.getElementById('product_vendor_select').addEventListener('change',e=>{const v=findById(qbEntities.vendors,e.target.value)||{};document.getElementById('product_vendor_qb_id').value=v.id||'';document.getElementById('product_vendor_name').value=v.name||'';});document.getElementById('decoration_vendor_select').addEventListener('change',e=>{const v=findById(qbEntities.vendors,e.target.value)||{};document.getElementById('decoration_vendor_qb_id').value=v.id||'';document.getElementById('decoration_vendor_name').value=v.name||'';});}
 async function sha256(text){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
 async function unlock(){const pw=document.getElementById('password').value;const hash=await sha256(pw);if(hash===PASSWORD_HASH){sessionStorage.setItem('merchd_order_unlocked','1');sessionStorage.setItem('merchd_order_password',pw);document.getElementById('order_entry_password').value=pw;document.getElementById('lock').classList.add('hidden');document.getElementById('app').classList.remove('hidden');}else{const s=document.getElementById('lock_status');s.textContent='Invalid password.';s.className='status err';}}
 function itemTemplate(i){return `<div class="item-card"><div class="item-head">Item ${i}</div><div class="grid g4"><div class="f"><label>Item # / SKU ${i===1?'<span class="r">*</span>':''}</label><input name="Item ${i} SKU" ${i===1?'required':''}></div><div class="f"><label>Description ${i===1?'<span class="r">*</span>':''}</label><input name="Item ${i} Description" ${i===1?'required':''}></div><div class="f"><label>Quantity ${i===1?'<span class="r">*</span>':''}</label><input name="Item ${i} Qty" type="number" min="0" step="1" ${i===1?'required':''}></div><div class="f"><label>Color</label><input name="Item ${i} Color"></div><div class="f"><label>Vendor Unit Cost</label><input name="Item ${i} Vendor Cost" type="number" min="0" step="0.01"></div><div class="f"><label>Customer Selling Price</label><input name="Item ${i} Selling Price" type="number" min="0" step="0.01"></div><div class="f span4"><label>Size Breakdown / Item Notes</label><input name="Item ${i} Notes" placeholder="S-10, M-20, L-20, XL-10; special instructions"></div></div></div>`}
