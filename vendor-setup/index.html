@@ -335,6 +335,16 @@ function cloneFormData(source, options = {}) {
   return copy;
 }
 
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 async function submitForm() {
   // Validate required fields
   if (!val('co_name'))   { alert('Legal Company Name is required.'); return; }
@@ -415,11 +425,27 @@ async function submitForm() {
     // files uploads to OneDrive, and sends routed Discord/email intake notices.
     const automationFd = cloneFormData(fd);
     automationFd.delete('access_key');
-    const resp = await fetch('https://webhook.merchd.co/webhook', {
-      method: 'POST',
-      body: automationFd
-    });
-    if (!resp.ok) throw new Error('Automation webhook failed: ' + resp.status);
+    try {
+      const resp = await fetchWithTimeout('https://webhook.merchd.co/webhook', {
+        method: 'POST',
+        body: automationFd
+      }, 10000);
+      if (!resp.ok) throw new Error('Automation webhook failed: ' + resp.status);
+    } catch (primaryError) {
+      console.warn('Primary Merch\'d automation failed; trying cloud fallback:', primaryError);
+      const fallbackFd = cloneFormData(fd);
+      fallbackFd.set('form_type', 'vendor');
+      fallbackFd.set('fallback_reason', String(primaryError && primaryError.message ? primaryError.message : primaryError));
+      const fallbackResp = await fetchWithTimeout('https://merchd-form-fallback.mikeaero44.workers.dev/webhook', {
+        method: 'POST',
+        body: fallbackFd
+      }, 10000);
+      if (!fallbackResp.ok) throw new Error('Fallback intake failed: ' + fallbackResp.status);
+      const fallbackData = await fallbackResp.json().catch(() => ({}));
+      if (fallbackData.status !== 'fallback_received' && fallbackData.status !== 'fallback_ready') {
+        throw new Error('Fallback intake returned unexpected status: ' + (fallbackData.status || 'unknown'));
+      }
+    }
 
     btn.textContent    = '✅ Submitted!';
     btn.style.background = '#276749';
