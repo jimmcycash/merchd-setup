@@ -1,0 +1,60 @@
+# ============================================================
+# Merch'd public-repo .gitignore — never commit secrets
+# ============================================================
+
+# --- Environment / config secrets -----
+.env
+.env.*
+!.env.example
+!.env.template
+
+# --- Auth tokens / keys -----
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+id_rsa*
+id_ed25519*
+*.gpg
+
+# --- Service account & OAuth token files -----
+service-account*.json
+credentials*.json
+client_secret*.json
+onedrive_tokens*.json
+quickbooks_tokens*.json
+qb_tokens*.json
+google_tokens*.json
+stripe_keys*.json
+secrets/
+private/
+
+# --- Passwords / password managers -----
+*.kdbx
+passwords.txt
+passwords.md
+credentials.txt
+
+# --- OS / editor cruft -----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# --- Node -----
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# --- Local databases -----
+*.sqlite
+*.sqlite-*
+*.db
+
+# --- Backups -----
+*.bak
+*.backup
+*-backup-*
